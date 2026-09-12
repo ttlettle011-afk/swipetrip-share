@@ -1,0 +1,830 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>SwipeTrip — 같이 골라요</title>
+<meta property="og:title" content="친구가 SwipeTrip에 초대했어요" />
+<meta property="og:description" content="가입 없이 바로 참여할 수 있어요 — 같이 골라서 하루 코스 완성" />
+<meta property="og:type" content="website" />
+<style>
+  :root {
+    --bg-page: #070810; --bg-card: #10121a; --bg-media: #0f1115;
+    --border: rgba(255,255,255,0.10);
+    --text-primary: #f4f5f7; --text-secondary: #a7adba;
+    --blue-primary: #3f7fd8; --blue-deep: #2457a6; --blue-soft: #e8f0fa;
+    --mint: #00f0c8;
+    --warm1: rgba(255,107,91,0.10); 
+    --warm4: #ff6b5b;
+    --acc: #ff3b6b;
+    --nope: #6b7aff;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-font-smoothing: antialiased; }
+  body {
+    font-family: -apple-system, "Apple SD Gothic Neo", "Pretendard", system-ui, sans-serif;
+    background: var(--bg-page); color: var(--text-primary); line-height: 1.45;
+  }
+  .wrap { max-width: 480px; margin: 0 auto; min-height: 100vh; padding: 0 20px; display: flex; flex-direction: column; }
+  .state { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 40px 8px; }
+  .state .ico { font-size: 40px; }
+  .state .t1 { font-size: 18px; font-weight: 800; margin-top: 12px; }
+  .state .t2 { font-size: 13.5px; color: var(--text-secondary); margin-top: 6px; line-height: 1.5; }
+  .state .homeLink { display: inline-block; margin-top: 18px; font-size: 13.5px; font-weight: 700;
+    text-decoration: none; color: var(--mint); border: 1px solid rgba(0,240,200,0.34);
+    border-radius: 999px; padding: 9px 18px; }
+  .state .homeLink:hover, .state .homeLink:focus-visible { border-color: var(--mint); }
+  .hidden { display: none !important; }
+  [hidden] { display: none !important; }
+  
+  .joinCard { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: stretch; text-align: left; gap: 14px; padding: 24px 0; }
+  .kicker { font-size: 12px; font-weight: 700; color: var(--mint); }
+  .greet { font-size: 19px; font-weight: 800; letter-spacing: -0.02em; }
+  .field { display: flex; flex-direction: column; gap: 6px; margin-top: 4px; }
+  .field label { font-size: 12.5px; color: var(--text-secondary); font-weight: 600; }
+  .field input {
+    font-size: 16px; padding: 13px 14px; border-radius: 12px; border: 1px solid var(--border);
+    background: var(--bg-card); color: var(--text-primary); outline: none;
+  }
+  .field input:focus { border-color: var(--blue-primary); }
+  .hint { font-size: 12px; color: var(--text-secondary); line-height: 1.5; }
+  .joinCard .hint { text-align: center; }
+  .cta-btn {
+    display: block; width: 100%; background: var(--bg-media); color: #fff; border: none;
+    border-radius: 999px; padding: 15px; font-size: 15px; font-weight: 800; cursor: pointer; margin-top: 4px;
+  }
+  .cta-btn:disabled { opacity: 0.45; cursor: default; }
+  .cta-btn.ghost { background: transparent; color: var(--text-primary); border: 1.5px solid var(--border); }
+  .cta-btn.mint { background: var(--mint); color: #070810; }
+  .errBanner {
+    font-size: 12.5px; color: var(--warm4); background: var(--warm1); border-radius: 12px;
+    padding: 8px 10px; margin-top: 4px; display: none;
+  }
+  
+  .photoStrip { display: flex; gap: 8px; }
+  .photoCell {
+    flex: 1; aspect-ratio: 3/4; border-radius: 16px; border: 1px solid var(--border);
+    overflow: hidden; position: relative; background: var(--bg-media);
+  }
+  .photoCell img, .photoCell .miniGrad { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  .photoCell .nameTag {
+    position: absolute; left: 0; right: 0; bottom: 0; padding: 14px 8px 7px;
+    font-size: 11px; font-weight: 700; color: #fff;
+    background: linear-gradient(180deg, transparent, rgba(0,0,0,0.62));
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .photoCell .morePill {
+    position: absolute; top: 6px; right: 6px; font-size: 10.5px; font-weight: 800;
+    color: #fff; background: rgba(0,0,0,0.55); border-radius: 999px; padding: 2px 7px;
+  }
+  .hostCard {
+    display: flex; align-items: center; gap: 8px; background: var(--bg-card);
+    border: 1px solid var(--border); border-radius: 16px; padding: 10px 12px;
+    font-size: 13px; color: var(--text-secondary);
+  }
+  .hostCard b { color: var(--text-primary); }
+  .hostDot { flex: none; width: 26px; height: 26px; border-radius: 999px; background: linear-gradient(140deg, var(--acc), #7a2b45); }
+  .readyCard { flex: 1; display: flex; flex-direction: column; justify-content: center; gap: 10px; padding: 24px 0; text-align: center; }
+  .readyCard .t1 { font-size: 17px; font-weight: 800; }
+  .readyCard .t2 { font-size: 13.5px; color: var(--text-secondary); line-height: 1.5; }
+  
+  .doneKicker { font-size: 12px; font-weight: 700; color: var(--mint); }
+  .doneThumbs { display: flex; gap: 6px; justify-content: center; }
+  .doneThumbs .cell {
+    width: 64px; height: 64px; border-radius: 12px; border: 1px solid var(--border);
+    overflow: hidden; position: relative; background: var(--bg-media);
+  }
+  .doneThumbs .cell img, .doneThumbs .cell .miniGrad { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  .doneThumbs .cell .nameTag {
+    position: absolute; left: 0; right: 0; bottom: 0; padding: 10px 5px 4px;
+    font-size: 9.5px; font-weight: 700; color: #fff;
+    background: linear-gradient(180deg, transparent, rgba(0,0,0,0.65));
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-align: left;
+  }
+  .doneThumbs .cell .moreTag {
+    position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 800; color: #fff; background: rgba(0,0,0,0.55);
+  }
+  .statePillRow { display: flex; justify-content: center; }
+  .statePillRow span {
+    font-size: 12px; font-weight: 700; color: var(--mint);
+    border: 1px solid rgba(0,240,200,0.4); border-radius: 999px; padding: 4px 12px;
+  }
+  
+  .revisitCard { flex: 1; display: flex; flex-direction: column; justify-content: center; gap: 12px; padding: 24px 0; text-align: center; }
+  .revisitCard .ico { font-size: 34px; }
+  .revisitCard .t1 { font-size: 17px; font-weight: 800; }
+  .revisitCard .t2 { font-size: 13.5px; color: var(--text-secondary); line-height: 1.5; }
+  .revisitBtns { display: flex; flex-direction: column; gap: 8px; margin-top: 8px; }
+  
+  .swipeWrap { flex: 1; display: flex; flex-direction: column; align-items: stretch; gap: 12px; padding: 16px 0 22px; min-height: 100vh; }
+  .topRow { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+  .whoPill {
+    font-size: 12.5px; font-weight: 700; color: var(--text-secondary);
+    background: var(--bg-card); border: 1px solid var(--border); border-radius: 999px; padding: 6px 12px;
+  }
+  .whoPill b { color: var(--text-primary); }
+  .progress { font-size: 12.5px; font-weight: 700; color: var(--text-secondary); }
+  .cardStack { position: relative; width: 100%; flex: 1; min-height: 340px; touch-action: none; }
+  .swCard {
+    position: absolute; inset: 0; border-radius: 16px; overflow: hidden;
+    background: var(--bg-media); box-shadow: 0 10px 30px rgba(15,17,21,0.16);
+    display: flex; flex-direction: column; will-change: transform;
+  }
+  .swCard.dragging { transition: none; }
+  .swCard.settling { transition: transform 220ms cubic-bezier(.2,.8,.2,1); }
+  .swCard .media { position: relative; flex: 1; }
+  .swCard .media img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .swCard .media .grad { width: 100%; height: 100%; }
+  .swCard .honestyPill {
+    position: absolute; top: 12px; left: 12px; font-size: 11px; font-weight: 700; color: #fff;
+    background: rgba(0,0,0,0.42); border-radius: 999px; padding: 5px 10px;
+  }
+  .swCard .scrim {
+    position: absolute; left: 0; right: 0; bottom: 0; padding: 16px;
+    background: linear-gradient(180deg, transparent, rgba(0,0,0,0.6));
+  }
+  .swCard .pname { font-size: 17px; font-weight: 800; color: #fff; letter-spacing: -0.01em; }
+  .swCard .psub { font-size: 13.5px; color: rgba(255,255,255,0.85); margin-top: 2px; }
+  .swCard .stampNope, .swCard .stampLike {
+    position: absolute; top: 24px; font-size: 13px; font-weight: 900; letter-spacing: 0.06em;
+    border: 3px solid; border-radius: 999px; padding: 6px 12px; opacity: 0; transform: rotate(-14deg);
+  }
+  .swCard .stampNope { left: 18px; color: var(--nope); border-color: var(--nope); }
+  .swCard .stampLike { right: 18px; color: var(--acc); border-color: var(--acc); transform: rotate(14deg); }
+  .swipeBtns { display: flex; gap: 10px; justify-content: center; }
+  .swipeBtns button {
+    flex: 1; height: 52px; border-radius: 999px; font-size: 14.5px; font-weight: 800;
+    background: var(--bg-card); cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  }
+  .nopeBtn { color: var(--nope); border: 1.5px solid var(--nope); }
+  .swipeBtns .likeBtn { color: #fff; background: var(--acc); border: none; }
+  .swipeBtns button:disabled { opacity: 0.4; cursor: default; }
+  .cta-btn:active:not(:disabled), .swipeBtns button:active:not(:disabled) { transform: scale(0.98); }
+  .footHint { text-align: center; font-size: 12px; color: var(--text-secondary); }
+  
+  button:focus-visible, input:focus-visible { outline: 2px solid var(--mint); outline-offset: 2px; }
+</style>
+</head>
+<body>
+  <div class="wrap">
+
+    <div id="loading" class="state">
+      <div class="ico">🧳</div>
+      <div class="t1">방을 찾는 중…</div>
+    </div>
+
+    <div id="error" class="state hidden">
+      <div class="ico" id="errorIco">🥲</div>
+      <div class="t1" id="errorTitle">방을 찾을 수 없어요</div>
+      <div class="t2" id="errorBody">링크를 다시 확인해 주세요.</div>
+      <a class="homeLink" href="../">SwipeTrip이 뭔가요? →</a>
+    </div>
+
+    <div id="join" class="state hidden joinCard">
+      <div class="kicker">같이 · 초대받음</div>
+      <div class="greet" id="joinGreet">함께 갈 곳,<br />맘에 드는 데를 골라주세요</div>
+      <div class="photoStrip" id="photoStrip"></div>
+      <div class="hostCard" id="hostCard" hidden><span class="hostDot"></span><span id="hostCardText"></span></div>
+      <div class="field">
+        <label for="nickname">닉네임</label>
+        <input id="nickname" type="text" maxlength="12" placeholder="예: 민지" autocomplete="off" />
+      </div>
+      <div class="errBanner" id="joinErr"></div>
+      <button class="cta-btn mint" id="joinBtn">참여하기</button>
+      <div class="hint">로그인 없음 · 설치 없음 · 링크는 72시간 유효</div>
+    </div>
+
+    <div id="revisit" class="state hidden revisitCard">
+      <div class="ico">🔁</div>
+      <div class="t1" id="revisitTitle">이미 골랐었어요</div>
+      <div class="t2" id="revisitBody"></div>
+      <div class="revisitBtns">
+        <button class="cta-btn" id="revisitContinueBtn">그대로 두기</button>
+        <button class="cta-btn ghost" id="revisitRestartBtn">다시 골라볼게요</button>
+      </div>
+    </div>
+
+    <div id="swipe" class="state hidden swipeWrap">
+      <div class="topRow">
+        <span class="whoPill" id="whoPill"></span>
+        <span class="progress" id="progress">0 / 0</span>
+      </div>
+      <div class="cardStack" id="cardStack"></div>
+      <div class="swipeBtns">
+        <button class="nopeBtn" id="nopeBtn" type="button">✕ 별로예요</button>
+        <button class="likeBtn" id="likeBtn" type="button">♥ 좋아요</button>
+      </div>
+      <div class="footHint" id="footHint">로그인 없음 · 다 고르면 방에 바로 반영돼요</div>
+    </div>
+
+    <div id="done" class="state hidden readyCard">
+      <div class="doneKicker" id="doneKicker" hidden>보내기 완료</div>
+      <div class="t1" id="doneTitle">보냈어요</div>
+      <div class="doneThumbs" id="doneThumbs" hidden></div>
+      <div class="statePillRow" id="doneState" hidden><span id="doneStateText"></span></div>
+      <div class="t2" id="doneBody"></div>
+      <div class="errBanner" id="doneErr"></div>
+    </div>
+
+  </div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script>
+(function () {
+  'use strict';
+  var $ = function (id) { return document.getElementById(id); };
+
+  // 서버 전용 비밀 키(anon 아닌 다른 등급)는 이 파일에 절대 넣지 않는다.
+  var SUPABASE_URL = 'https://ploaricjtwzqyzjbkawt.supabase.co';
+  var SUPABASE_ANON_KEY = 'sb_publishable_DKYpATdTjGlbOxsBKLKyUQ_HyNpDhd0';
+
+  var ROOM_TTL_MS = 72 * 60 * 60 * 1000;
+  var DEVICE_KEY = 'swipetrip:duo:device_id';
+  var NAME_KEY_PREFIX = 'swipetrip:duo:name:';
+
+  // 값 그대로 이식(코드 재사용 아님, 값만). 사진 404/없음일 때만 쓰고 항상 honesty 라벨과 짝짓는다.
+  var CATEGORY_GRADIENTS = {
+    cafe: ['#c79b6e', '#6b4a2e'], dessert: ['#e7a6b8', '#7a3a52'], night: ['#27406b', '#0a1430'],
+    park: ['#7fae5a', '#27502c'], bakery: ['#d8a45c', '#7a4a20'], gallery: ['#9a9aa8', '#3a3a48'],
+    vintage: ['#b98a6a', '#5a3a2a'], dining: ['#c25a4a', '#4a1f1a'], bar: ['#3a2a5a', '#160a30'],
+    hanok: ['#9c6a44', '#3a2414'], river: ['#3f78c8', '#16315e'], market: ['#cf8a4a', '#5a3210'],
+  };
+  var CATEGORY_HINTS = [
+    [/카페|coffee|cafe/i, 'cafe'], [/디저트|dessert|케이크/i, 'dessert'], [/베이커리|빵|bakery/i, 'bakery'],
+    [/바|펍|와인|bar|pub|wine|술|이자카야|포차/i, 'bar'], [/공원|park|숲|정원/i, 'park'],
+    [/한강|강|river|호수/i, 'river'], [/갤러리|미술|전시|gallery|museum|아트/i, 'gallery'],
+    [/빈티지|편집샵|소품|vintage|shop/i, 'vintage'], [/한옥|hanok|전통/i, 'hanok'],
+    [/시장|market|마켓/i, 'market'], [/야경|루프탑|night|클럽/i, 'night'],
+    [/식당|음식|레스토랑|맛집|dining|restaurant|고기|면/i, 'dining'],
+  ];
+  function gradientForCategory(category) {
+    for (var i = 0; i < CATEGORY_HINTS.length; i++) {
+      if (CATEGORY_HINTS[i][0].test(category || '')) return CATEGORY_GRADIENTS[CATEGORY_HINTS[i][1]];
+    }
+    return CATEGORY_GRADIENTS.cafe;
+  }
+
+  // web/share-viewer/s/index.html의 safeImg와 동일 가드 — http(s) 아닌 값(data:, javascript: 등)은
+  // 절대 src에 넣지 않는다.
+  function safeImg(u) {
+    return typeof u === 'string' && /^https?:\/\//i.test(u) ? u : null;
+  }
+
+  // ── taste v2 #1: 조인 미리보기(사진 스트립 + 방장 카드) ──
+  // 이미지 규약은 카드 렌더와 동일: safeImg 통과분만 <img>, 실패/없음은 카테고리 그라데이션.
+  // 스트립은 미리보기라 honesty pill 없이 소형 그라데이션만(카드 본체에는 기존대로 pill 유지).
+  function miniGradient(c) {
+    var grad = document.createElement('div');
+    grad.className = 'miniGrad';
+    var pair = gradientForCategory(c && c.category);
+    grad.style.background = 'linear-gradient(150deg,' + pair[0] + ',' + pair[1] + ')';
+    return grad;
+  }
+
+  function fillCellMedia(cell, c) {
+    var imgUrl = safeImg(c && c.image);
+    if (imgUrl) {
+      var img = document.createElement('img');
+      img.alt = '';
+      img.loading = 'lazy';
+      img.src = imgUrl; // property 대입 = 속성 탈출 불가(share-viewer safeImg 패턴)
+      img.onerror = function () {
+        if (img.parentNode === cell) cell.removeChild(img);
+        cell.insertBefore(miniGradient(c), cell.firstChild);
+      };
+      cell.appendChild(img);
+    } else {
+      cell.appendChild(miniGradient(c));
+    }
+  }
+
+  function mostCommonRegion() {
+    var counts = {};
+    var best = '';
+    var bestN = 0;
+    room.candidates.forEach(function (c) {
+      var r = (c && c.region) || '';
+      if (!r) return;
+      counts[r] = (counts[r] || 0) + 1;
+      if (counts[r] > bestN) { bestN = counts[r]; best = r; }
+    });
+    return best;
+  }
+
+  // 방장 카드 — hostName은 비동기로 늦게 오므로(아래 vote_members 조회) 갱신 재호출 가능해야 한다.
+  function updateHostCard() {
+    if (!room) return;
+    var text = $('hostCardText');
+    text.textContent = '';
+    var b1 = document.createElement('b');
+    b1.textContent = hostName;
+    text.appendChild(b1);
+    var scope = (typeof room.title === 'string' && room.title.trim()) ? room.title.trim() : mostCommonRegion();
+    text.appendChild(document.createTextNode('님이 ' + (scope ? scope + ' ' : '') + '후보 '));
+    var b2 = document.createElement('b');
+    b2.textContent = String(room.candidates.length);
+    text.appendChild(b2);
+    text.appendChild(document.createTextNode('곳을 골라뒀어요'));
+    $('hostCard').hidden = false;
+  }
+
+  function buildJoinPreview() {
+    var strip = $('photoStrip');
+    strip.textContent = '';
+    var shown = room.candidates.slice(0, 3);
+    var rest = room.candidates.length - shown.length;
+    shown.forEach(function (c, i) {
+      var cell = document.createElement('div');
+      cell.className = 'photoCell';
+      fillCellMedia(cell, c);
+      var tag = document.createElement('span');
+      tag.className = 'nameTag';
+      tag.textContent = (c && c.name) || '';
+      cell.appendChild(tag);
+      if (i === shown.length - 1 && rest > 0) {
+        var more = document.createElement('span');
+        more.className = 'morePill';
+        more.textContent = '+' + rest;
+        cell.appendChild(more);
+      }
+      strip.appendChild(cell);
+    });
+    strip.hidden = shown.length === 0;
+    updateHostCard();
+  }
+
+  function showState(id) {
+    ['loading', 'error', 'join', 'revisit', 'swipe', 'done'].forEach(function (s) {
+      $(s).classList.toggle('hidden', s !== id);
+    });
+  }
+
+  function showError(title, body, ico) {
+    $('errorTitle').textContent = title;
+    $('errorBody').textContent = body;
+    $('errorIco').textContent = ico || '🥲';
+    showState('error');
+  }
+
+  function uuidv4() {
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+      var r = (Math.random() * 16) | 0;
+      var v = c === 'x' ? r : (r & 0x3) | 0x8;
+      return v.toString(16);
+    });
+  }
+
+  function getOrCreateDeviceId() {
+    try {
+      var existing = localStorage.getItem(DEVICE_KEY);
+      if (existing) return existing;
+      var fresh = uuidv4();
+      localStorage.setItem(DEVICE_KEY, fresh);
+      return fresh;
+    } catch (e) {
+      // localStorage 차단(프라이빗 모드 등) — 세션 한정 폴백
+      return uuidv4();
+    }
+  }
+
+  function isRoomExpired(createdAtIso, now) {
+    var created = new Date(createdAtIso).getTime();
+    return (now == null ? Date.now() : now) - created >= ROOM_TTL_MS;
+  }
+
+  // 다중 like = JSON 배열 문자열('["12","45"]'), 레거시 단일 id('12')도 그대로 수용.
+  function parseCandidateIdsWeb(raw) {
+    if (!raw) return [];
+    var trimmed = String(raw).trim();
+    if (trimmed.charAt(0) === '[' || trimmed.charAt(0) === '{') {
+      try {
+        var parsed = JSON.parse(trimmed);
+        return Array.isArray(parsed) ? parsed.map(function (x) { return String(x); }) : [];
+      } catch (e) {
+        return [];
+      }
+    }
+    return [trimmed];
+  }
+
+  var code = (window.location.hash || '').slice(1).trim().toUpperCase();
+  if (!code) {
+    showError('링크가 올바르지 않아요', '코드가 빠진 링크예요. 보낸 친구에게 다시 받아보세요.', '🔗');
+    return;
+  }
+
+  if (typeof supabase === 'undefined' || !supabase.createClient) {
+    showError('페이지를 열 수 없어요', '네트워크 상태를 확인하고 다시 열어보세요.', '📡');
+    return;
+  }
+
+  var client = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  var deviceId = getOrCreateDeviceId();
+  var room = null; // { id, code, hostDevice, title, candidates, status, createdAt }
+  var hostName = '주인';
+  var myName = '';
+
+  // ── D10: 스와이프 세션 상태 ──
+  var deckIndex = 0;
+  var myLikes = []; // 이번 세션에서 좋아요한 candidate id(string) 목록
+  var dragState = null;
+
+  function mapRoom(row) {
+    return {
+      id: String(row.id),
+      code: String(row.code),
+      hostDevice: String(row.host_device),
+      title: typeof row.title === 'string' ? row.title : null,
+      candidates: Array.isArray(row.candidates) ? row.candidates : [],
+      status: String(row.status || 'open'),
+      createdAt: String(row.created_at || new Date(0).toISOString()),
+    };
+  }
+
+  client
+    .from('vote_rooms')
+    .select('id,code,host_device,title,candidates,status,created_at')
+    .eq('code', code)
+    .maybeSingle()
+    .then(function (res) {
+      if (res.error) {
+        showError('페이지를 열 수 없어요', '네트워크 상태를 확인하고 다시 열어보세요.', '📡');
+        return;
+      }
+      if (!res.data) {
+        showError('방을 찾을 수 없어요', '코드가 정확한지 확인해 주세요. 링크를 다시 받아보는 게 가장 빨라요.', '🥲');
+        return;
+      }
+      room = mapRoom(res.data);
+      if (isRoomExpired(room.createdAt)) {
+        showError('방이 만료됐어요', '초대 링크는 72시간만 유효해요. 친구에게 새 링크를 받아보세요.', '⏰');
+        return;
+      }
+      var savedName = '';
+      try { savedName = localStorage.getItem(NAME_KEY_PREFIX + room.id) || ''; } catch (e) {}
+      // taste v2 — 헤드라인은 정적 카피, 방 제목·후보 수는 방장 카드가 담당(buildJoinPreview).
+      buildJoinPreview();
+      $('nickname').value = savedName;
+      showState('join');
+
+      // 방장 닉네임 — footHint("다 고르면 {주인}님 방 화면에 바로 반영돼요")용. 실패해도 참여 흐름은
+      // 막지 않는다(폴백 '주인'). E2 design-consistency-8 — 앱 쪽 기본 닉네임이 '나'라서 방장이 그
+      // 이름 그대로면 "나님에게" 처럼 어색한 자기 지칭이 되던 것 — '친구'로 대체.
+      client
+        .from('vote_members')
+        .select('device_id,name')
+        .eq('room_id', room.id)
+        .then(function (mres) {
+          if (mres.error || !mres.data) return;
+          for (var i = 0; i < mres.data.length; i++) {
+            if (String(mres.data[i].device_id) === room.hostDevice) {
+              var fetchedName = String(mres.data[i].name || '주인');
+              hostName = fetchedName === '나' ? '친구' : fetchedName;
+              updateHostCard(); // taste v2 — 조인 방장 카드도 실이름으로 갱신
+              break;
+            }
+          }
+        })
+        .catch(function () {});
+    })
+    .catch(function () {
+      showError('페이지를 열 수 없어요', '네트워크 상태를 확인하고 다시 열어보세요.', '📡');
+    });
+
+  function setJoinError(msg) {
+    var el = $('joinErr');
+    if (!msg) { el.style.display = 'none'; el.textContent = ''; return; }
+    el.textContent = msg;
+    el.style.display = 'block';
+  }
+
+  $('joinBtn').addEventListener('click', function () {
+    if (!room) return;
+    // dev-web-sec-4 (2026-09-03) — 만료 재확인. 로드 시(:350)만 검사하면 join 화면을
+    // 72h 경계 너머까지 열어둔 채로 참여를 눌러 멤버 행만 생기고(투표는 못 함) 만장일치
+    if (isRoomExpired(room.createdAt)) {
+      showError('방이 만료됐어요', '초대 링크는 72시간만 유효해요. 친구에게 새 링크를 받아보세요.', '⏰');
+      return;
+    }
+    var name = $('nickname').value.trim();
+    if (!name) { setJoinError('닉네임을 입력해 주세요.'); return; }
+    setJoinError('');
+    $('joinBtn').disabled = true;
+    $('joinBtn').textContent = '참여하는 중…';
+
+    client
+      .from('vote_members')
+      .upsert(
+        { room_id: room.id, device_id: deviceId, name: name.slice(0, 12) || '게스트' },
+        { onConflict: 'room_id,device_id' },
+      )
+      .then(function (res) {
+        if (res.error) {
+          setJoinError('참여에 실패했어요. 다시 시도해 주세요.');
+          $('joinBtn').disabled = false;
+          $('joinBtn').textContent = '참여하기';
+          return;
+        }
+        try { localStorage.setItem(NAME_KEY_PREFIX + room.id, name); } catch (e) {}
+        myName = name.slice(0, 12) || '게스트';
+        proceedAfterJoin();
+      })
+      .catch(function () {
+        setJoinError('참여에 실패했어요. 다시 시도해 주세요.');
+        $('joinBtn').disabled = false;
+        $('joinBtn').textContent = '참여하기';
+      });
+  });
+
+  function loadMyLikesWeb() {
+    return client
+      .from('votes')
+      .select('candidate_id')
+      .eq('room_id', room.id)
+      .eq('device_id', deviceId)
+      .maybeSingle()
+      .then(function (res) {
+        if (res.error || !res.data) return [];
+        return parseCandidateIdsWeb(res.data.candidate_id);
+      })
+      .catch(function () { return []; });
+  }
+
+  function proceedAfterJoin() {
+    loadMyLikesWeb().then(function (existing) {
+      if (existing && existing.length > 0) {
+        $('revisitBody').textContent = myName + '님, 이전에 ' + existing.length + '곳을 좋아요 했어요. 보낸 그대로 둘까요, 다시 고를까요?';
+        $('revisitContinueBtn').onclick = function () { showDone(existing); };
+        $('revisitRestartBtn').onclick = function () { startSwipe(); };
+        showState('revisit');
+        return;
+      }
+      startSwipe();
+    });
+  }
+
+  function startSwipe() {
+    deckIndex = 0;
+    myLikes = [];
+    var whoPill = $('whoPill');
+    whoPill.textContent = '';
+    whoPill.appendChild(document.createTextNode('닉네임 — '));
+    var b = document.createElement('b');
+    b.textContent = myName;
+    whoPill.appendChild(b);
+    // taste v2 — '로그인 없음'은 조인 화면 hint로 이동, 여기선 반영 약속만.
+    $('footHint').textContent = '다 고르면 ' + hostName + '님 방 화면에 바로 반영돼요';
+    showState('swipe');
+    renderCard();
+  }
+
+  function updateProgress() {
+    $('progress').textContent = (deckIndex + 1 <= room.candidates.length ? deckIndex + 1 : room.candidates.length) + ' / ' + room.candidates.length;
+  }
+
+  function renderCard() {
+    var stack = $('cardStack');
+    stack.innerHTML = '';
+    if (!room.candidates.length) {
+      finalize();
+      return;
+    }
+    if (deckIndex >= room.candidates.length) {
+      finalize();
+      return;
+    }
+    updateProgress();
+    $('nopeBtn').disabled = false;
+    $('likeBtn').disabled = false;
+
+    var c = room.candidates[deckIndex];
+    var card = document.createElement('div');
+    card.className = 'swCard';
+
+    var media = document.createElement('div');
+    media.className = 'media';
+    var imgUrl = safeImg(c && c.image);
+    if (imgUrl) {
+      var img = document.createElement('img');
+      img.alt = '';
+      img.loading = 'lazy';
+      img.src = imgUrl; // property 대입 = 속성 탈출 불가(share-viewer safeImg 패턴)
+      img.onerror = function () {
+        media.removeChild(img);
+        media.insertBefore(buildGradient(c), media.firstChild);
+      };
+      media.appendChild(img);
+    } else {
+      media.appendChild(buildGradient(c));
+    }
+
+    var stampNope = document.createElement('div');
+    stampNope.className = 'stampNope';
+    stampNope.textContent = '별로예요';
+    var stampLike = document.createElement('div');
+    stampLike.className = 'stampLike';
+    stampLike.textContent = '좋아요';
+    media.appendChild(stampNope);
+    media.appendChild(stampLike);
+
+    var scrim = document.createElement('div');
+    scrim.className = 'scrim';
+    var pname = document.createElement('div');
+    pname.className = 'pname';
+    pname.textContent = (c && c.name) || '이름 미상';
+    var psub = document.createElement('div');
+    psub.className = 'psub';
+    var region = (c && c.region) || '';
+    var category = (c && c.category) || '';
+    psub.textContent = [region, category].filter(Boolean).join(' · ');
+    scrim.appendChild(pname);
+    scrim.appendChild(psub);
+
+    card.appendChild(media);
+    card.appendChild(scrim);
+    stack.appendChild(card);
+
+    wireGesture(card, stampNope, stampLike);
+  }
+
+  function buildGradient(c) {
+    var grad = document.createElement('div');
+    grad.className = 'grad';
+    var pair = gradientForCategory(c && c.category);
+    grad.style.background = 'linear-gradient(150deg,' + pair[0] + ',' + pair[1] + ')';
+    var pill = document.createElement('div');
+    pill.className = 'honestyPill';
+    pill.textContent = '📷 분위기 예시 사진';
+    var holder = document.createElement('div');
+    holder.style.position = 'relative';
+    holder.style.width = '100%';
+    holder.style.height = '100%';
+    holder.appendChild(grad);
+    holder.appendChild(pill);
+    return holder;
+  }
+
+  // 제스처(포인터 이벤트, 좌/우) + 버튼 병행 — 버튼이 폴백(데스크톱 심사 대비).
+  function wireGesture(card, stampNope, stampLike) {
+    var startX = 0, startY = 0, dx = 0, active = false;
+    var THRESHOLD = 90;
+
+    function setTransform(x) {
+      var rot = Math.max(-14, Math.min(14, x / 12));
+      card.style.transform = 'translateX(' + x + 'px) rotate(' + rot + 'deg)';
+      var t = Math.min(1, Math.abs(x) / THRESHOLD);
+      stampNope.style.opacity = x < 0 ? t : 0;
+      stampLike.style.opacity = x > 0 ? t : 0;
+    }
+
+    function onDown(e) {
+      active = true;
+      startX = e.clientX; startY = e.clientY; dx = 0;
+      card.classList.add('dragging');
+      card.classList.remove('settling');
+      try { card.setPointerCapture(e.pointerId); } catch (err) {}
+    }
+    function onMove(e) {
+      if (!active) return;
+      dx = e.clientX - startX;
+      setTransform(dx);
+    }
+    function onUp() {
+      if (!active) return;
+      active = false;
+      card.classList.remove('dragging');
+      card.classList.add('settling');
+      if (dx <= -THRESHOLD) { decide('nope'); return; }
+      if (dx >= THRESHOLD) { decide('like'); return; }
+      setTransform(0);
+    }
+
+    card.addEventListener('pointerdown', onDown);
+    card.addEventListener('pointermove', onMove);
+    card.addEventListener('pointerup', onUp);
+    card.addEventListener('pointercancel', onUp);
+
+    card.dispatchAction = function (action) {
+      card.classList.add('settling');
+      setTransform(action === 'like' ? 400 : -400);
+    };
+  }
+
+  function decide(action) {
+    var stack = $('cardStack');
+    var card = stack.querySelector('.swCard');
+    if (card && card.dispatchAction) card.dispatchAction(action);
+    if (action === 'like') {
+      var c = room.candidates[deckIndex];
+      myLikes.push(String(c.id));
+    }
+    deckIndex += 1;
+    // 던짐 애니메이션이 눈에 보이도록 짧게 대기 후 다음 카드.
+    window.setTimeout(renderCard, 180);
+  }
+
+  $('nopeBtn').addEventListener('click', function () {
+    $('nopeBtn').disabled = true; $('likeBtn').disabled = true;
+    decide('nope');
+  });
+  $('likeBtn').addEventListener('click', function () {
+    $('nopeBtn').disabled = true; $('likeBtn').disabled = true;
+    decide('like');
+  });
+
+  function castLikesWeb(ids) {
+    if (ids.length === 0) {
+      return client.from('votes').delete().eq('room_id', room.id).eq('device_id', deviceId);
+    }
+    return client
+      .from('votes')
+      .upsert(
+        { room_id: room.id, device_id: deviceId, candidate_id: JSON.stringify(ids) },
+        { onConflict: 'room_id,device_id' },
+      );
+  }
+
+  function finalize() {
+    // 방어적 재확인 — 스와이프 중 72h 창을 넘겼으면 쓰지 않는다(완료 조건: 만료 방 votes 신규 행 0건).
+    if (isRoomExpired(room.createdAt)) {
+      showError('방이 만료됐어요', '초대 링크는 72시간만 유효해요. 친구에게 새 링크를 받아보세요.', '⏰');
+      return;
+    }
+    castLikesWeb(myLikes)
+      .then(function (res) {
+        if (res.error) {
+          showSubmitError();
+          return;
+        }
+        showDone(myLikes);
+      })
+      .catch(function () {
+        showSubmitError();
+      });
+  }
+
+  function showSubmitError() {
+    // taste v2 — 실패 상태에서는 완료 요약(키커·썸네일·반영 pill)을 전부 숨긴다.
+    $('doneKicker').hidden = true;
+    $('doneThumbs').hidden = true;
+    $('doneThumbs').textContent = '';
+    $('doneState').hidden = true;
+    $('doneTitle').textContent = '보내는 데 실패했어요';
+    $('doneBody').textContent = '네트워크 상태를 확인하고 다시 열어서 이어가 주세요.';
+    var el = $('doneErr');
+    el.textContent = '전송 실패 — 링크를 다시 열면 이어서 진행할 수 있어요.';
+    el.style.display = 'block';
+    showState('done');
+  }
+
+  // taste v2 #3 — 좋아요한 곳 썸네일(최대 4칸, 초과분은 마지막 칸 +N 오버레이).
+  function buildDoneThumbs(ids) {
+    var row = $('doneThumbs');
+    row.textContent = '';
+    var picked = [];
+    ids.forEach(function (id) {
+      for (var i = 0; i < room.candidates.length; i++) {
+        if (String(room.candidates[i].id) === String(id)) { picked.push(room.candidates[i]); return; }
+      }
+    });
+    var shown = picked.slice(0, 4);
+    var rest = picked.length - shown.length;
+    shown.forEach(function (c, i) {
+      var cell = document.createElement('div');
+      cell.className = 'cell';
+      fillCellMedia(cell, c);
+      if (i === shown.length - 1 && rest > 0) {
+        var more = document.createElement('span');
+        more.className = 'moreTag';
+        more.textContent = '+' + rest;
+        cell.appendChild(more);
+      } else {
+        var tag = document.createElement('span');
+        tag.className = 'nameTag';
+        tag.textContent = (c && c.name) || '';
+        cell.appendChild(tag);
+      }
+      row.appendChild(cell);
+    });
+    row.hidden = shown.length === 0;
+  }
+
+  function showDone(ids) {
+    var count = ids.length;
+    $('doneErr').style.display = 'none';
+    $('doneKicker').hidden = false;
+    $('doneTitle').textContent = count + '곳 보냈어요';
+    buildDoneThumbs(ids);
+    $('doneStateText').textContent = '● ' + hostName + '님 방 화면에 반영됐어요';
+    $('doneState').hidden = count === 0;
+    // plan 002 D14-2 (조건부 P4) — "여기서 확인할 수 있어요"는 이 페이지가 확정 여부를
+    // 스스로 감지하지 않아 지킬 수 없는 약속이었다(DEV-DIRECTIVE §2 "미구현 기능 서술" 금지).
+    // 실제 경로 = host가 SeedResultScreen에서 buildShareUrl로 완성 코스 링크를 재발행해 보낸다.
+    // taste v2 카피 — 같은 사실을 하우스 보이스로 압축(약속 범위 불변).
+    $('doneBody').textContent = '코스가 확정되면 ' + hostName + '님이 완성된 코스 링크를 다시 보내줄 거예요. 안 오면 ' + hostName + '님께 물어봐도 좋아요.';
+    showState('done');
+  }
+})();
+</script>
+</body>
+</html>

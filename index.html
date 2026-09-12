@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>SwipeTrip — 붐비지 않는 하루를 넘겨서 고르는 앱</title>
+<meta name="description" content="한국관광공사 TourAPI와 서울시 실시간 도시데이터로, 지금 덜 붐비는 곳을 넘겨서 고르는 여행 발견 앱. 2026 관광데이터 활용 공모전 출품작." />
+<meta property="og:title" content="SwipeTrip — 붐비지 않는 하루를 넘겨서 고르는 앱" />
+<meta property="og:description" content="공공데이터로 만든 오버투어리즘 분산 앱. 2026 관광데이터 활용 공모전 출품작." />
+<style>
+  :root {
+    --bg-page: #070810; --bg-card: #10121a; --bg-soft: #171a24;
+    --border: rgba(255,255,255,0.10);
+    --text-primary: #f4f5f7; --text-secondary: #a7adba; --text-faint: #6f7686;
+    --mint: #00f0c8;
+    --amber: #f5c26b;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-font-smoothing: antialiased; }
+  body {
+    font-family: -apple-system, "Apple SD Gothic Neo", "Pretendard", system-ui, sans-serif;
+    background: var(--bg-page); color: var(--text-primary); line-height: 1.62;
+  }
+  img { max-width: 100%; display: block; }
+  a { color: var(--mint); }
+  a:focus-visible, button:focus-visible { outline: 2px solid var(--mint); outline-offset: 3px; }
+
+  .wrap { max-width: 760px; margin: 0 auto; padding: 44px 20px 80px; }
+  .kicker { font-size: 12.5px; font-weight: 700; color: var(--mint); letter-spacing: 0.02em; }
+  h1 { font-size: clamp(26px, 6vw, 34px); font-weight: 800; letter-spacing: -0.025em;
+       margin-top: 10px; line-height: 1.25; text-wrap: balance; }
+  .lead { font-size: 15.5px; color: var(--text-secondary); margin-top: 14px; }
+  .lead b { color: var(--text-primary); font-weight: 700; }
+
+  .badges { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 18px; }
+  .badge { font-size: 12px; font-weight: 600; padding: 5px 11px; border-radius: 999px;
+           border: 1px solid var(--border); color: var(--text-secondary); background: var(--bg-card); }
+  .badge.on { color: var(--mint); border-color: rgba(0,240,200,0.38); }
+  .badge.wait { color: var(--amber); border-color: rgba(245,194,107,0.36); }
+
+  h2 { font-size: 17px; font-weight: 800; margin-top: 42px; letter-spacing: -0.01em; }
+  h2 + .sub { font-size: 13.5px; color: var(--text-faint); margin-top: 4px; }
+
+  .card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px;
+          padding: 17px 19px; margin-top: 12px; }
+  .card p { font-size: 13.8px; color: var(--text-secondary); }
+  .card p + p { margin-top: 8px; }
+  .card b { color: var(--text-primary); }
+
+  .steps { display: grid; gap: 10px; margin-top: 14px; }
+  .step { display: grid; grid-template-columns: 26px 1fr; gap: 13px; align-items: start;
+          background: var(--bg-card); border: 1px solid var(--border); border-radius: 14px; padding: 14px 16px; }
+  .step .n { font-size: 12px; font-weight: 800; color: var(--mint); font-variant-numeric: tabular-nums;
+             border: 1px solid rgba(0,240,200,0.34); border-radius: 8px; text-align: center; padding: 2px 0; }
+  .step .t { font-size: 14.5px; font-weight: 700; }
+  .step .d { font-size: 13.3px; color: var(--text-secondary); margin-top: 3px; }
+
+  .shots { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-top: 14px; }
+  figure { background: var(--bg-card); border: 1px solid var(--border); border-radius: 14px;
+           overflow: hidden; display: flex; flex-direction: column; }
+  figure img { width: 100%; aspect-ratio: 603 / 1311; object-fit: cover; object-position: top;
+               border-bottom: 1px solid var(--border); background: var(--bg-soft); }
+  figcaption { font-size: 12.3px; color: var(--text-secondary); padding: 10px 12px; }
+  figcaption b { display: block; color: var(--text-primary); font-size: 13px; font-weight: 700; margin-bottom: 2px; }
+
+  .crowd { display: grid; gap: 8px; margin-top: 12px; }
+  .row { display: grid; grid-template-columns: 30px 1fr; gap: 12px; align-items: start;
+         background: var(--bg-card); border: 1px solid var(--border); border-radius: 13px; padding: 12px 15px; }
+  .row .mark { font-size: 17px; text-align: center; line-height: 1.35; }
+  .row .t { font-size: 14px; font-weight: 700; }
+  .row .d { font-size: 13.2px; color: var(--text-secondary); margin-top: 2px; }
+
+  .sources { display: grid; gap: 9px; margin-top: 12px; }
+  .src { background: var(--bg-card); border: 1px solid var(--border); border-radius: 13px; padding: 13px 16px; }
+  .src .n { font-size: 14px; font-weight: 700; }
+  .src .o { font-size: 12.4px; color: var(--mint); font-weight: 600; margin-top: 2px; }
+  .src .u { font-size: 13.2px; color: var(--text-secondary); margin-top: 5px; }
+
+  .links { display: flex; flex-wrap: wrap; gap: 9px; margin-top: 14px; }
+  .lnk { font-size: 13.5px; font-weight: 700; text-decoration: none; padding: 10px 16px;
+         border-radius: 11px; border: 1px solid var(--border); background: var(--bg-card); color: var(--text-primary); }
+  .lnk.primary { background: var(--mint); color: #04231f; border-color: var(--mint); }
+  .lnk:hover { border-color: rgba(0,240,200,0.45); }
+
+  video { width: 100%; border-radius: 14px; border: 1px solid var(--border); margin-top: 12px; background: #000; }
+
+  .note { font-size: 13px; color: var(--text-faint); margin-top: 10px; }
+  .foot { margin-top: 46px; padding-top: 16px; border-top: 1px solid var(--border);
+          font-size: 12.4px; color: var(--text-faint); line-height: 1.8; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="kicker">SwipeTrip</div>
+  <h1>붐비는 곳 말고,<br />오늘 한산한 곳으로.</h1>
+  <p class="lead">가고 싶은 곳을 <b>넘겨서 고르면</b> 하루 코스가 만들어집니다.
+    카드마다 <b>지금 얼마나 붐비는지</b>가 함께 붙고, 그 판단의 근거가 어디서 왔는지도 숨기지 않고 표시합니다.
+    한국관광공사와 서울시가 공개한 데이터로 만들었습니다.</p>
+
+  <div class="badges">
+    <span class="badge on">2026 관광데이터 활용 공모전 출품작</span>
+    <span class="badge on">지정과제 · 오버투어리즘</span>
+    <span class="badge">iOS · React Native</span>
+    <span class="badge wait">App Store 심사 준비 중</span>
+  </div>
+
+  <h2>어떻게 쓰나요</h2>
+  <div class="steps">
+    <div class="step"><span class="n">1</span><div>
+      <div class="t">언제 갈지, 어떤 기분인지 고르기</div>
+      <div class="d">"오늘 오후" 같은 방문 시점과 기분을 먼저 고릅니다. 회원가입도 로그인도 없습니다.</div></div></div>
+    <div class="step"><span class="n">2</span><div>
+      <div class="t">카드를 넘기며 마음에 드는 곳 고르기</div>
+      <div class="d">한 장씩 넘기면서 좋아요만 누르면 됩니다. 각 카드에 왜 추천됐는지 한 줄로 붙습니다.</div></div></div>
+    <div class="step"><span class="n">3</span><div>
+      <div class="t">고른 것들이 하루 코스가 됨</div>
+      <div class="d">동선과 시간대를 고려해 순서를 잡아줍니다. 붐비는 시간을 피해 배치합니다.</div></div></div>
+    <div class="step"><span class="n">4</span><div>
+      <div class="t">친구와 같이 고르기</div>
+      <div class="d">초대 링크를 보내면 친구는 <b>앱을 설치하지 않고 웹에서</b> 같이 넘길 수 있습니다.
+        둘 다 좋아한 곳이 바로 집계됩니다.</div></div></div>
+  </div>
+
+  <h2>혼잡을 어떻게 말하나</h2>
+  <p class="sub">모르는 것을 아는 척하지 않는 것이 이 앱의 규칙입니다. 근거의 세기를 세 단계로 나눠 표시합니다.</p>
+  <div class="crowd">
+    <div class="row"><span class="mark" style="color:var(--mint)">●</span><div>
+      <div class="t">실측</div>
+      <div class="d">서울시 실시간 도시데이터가 그 장소의 지금 인구를 직접 제공하는 경우.</div></div></div>
+    <div class="row"><span class="mark" style="color:var(--amber)">◐</span><div>
+      <div class="t">시기 예측</div>
+      <div class="d">한국관광공사 관광지 집중률 예측치. 앞으로 몇 주간의 혼잡 추이를 예측한 값입니다.</div></div></div>
+    <div class="row"><span class="mark" style="color:var(--text-faint)">○</span><div>
+      <div class="t">동네 기준</div>
+      <div class="d">그 장소 자체의 데이터가 없어 <b>동네 평균으로 대신 말하는 것</b>입니다.
+        장소 단위 정보가 아니라는 뜻을 표시로 그대로 드러냅니다.</div></div></div>
+  </div>
+
+  <h2>화면</h2>
+  <p class="sub">아래는 모두 실제 기기에서 찍은 화면입니다. 합성하거나 그린 목업이 아닙니다.</p>
+  <div class="shots">
+    <figure><img src="./shots/onboarding.png" alt="방문 시점과 기분을 고르는 온보딩 화면" loading="lazy" />
+      <figcaption><b>고르기 전에 묻기</b>언제 갈지·어떤 기분인지</figcaption></figure>
+    <figure><img src="./shots/deck.png" alt="추천 이유가 붙은 장소 카드" loading="lazy" />
+      <figcaption><b>왜 추천됐는지</b>카드마다 근거 한 줄</figcaption></figure>
+    <figure><img src="./shots/source.png" alt="한국관광공사 출처가 표시된 장소 상세" loading="lazy" />
+      <figcaption><b>출처를 밝힘</b>어느 공공데이터에서 왔는지</figcaption></figure>
+    <figure><img src="./shots/course.png" alt="완성된 하루 코스" loading="lazy" />
+      <figcaption><b>하루 코스</b>고른 것들이 순서대로</figcaption></figure>
+  </div>
+
+  <h2>어떤 공공데이터를 쓰나</h2>
+  <div class="sources">
+    <div class="src">
+      <div class="n">국문 관광정보 서비스 (TourAPI)</div>
+      <div class="o">한국관광공사</div>
+      <div class="u">장소 이름·주소·좌표·분류·소개·대표사진. 서울 기준 <b>8,008곳</b>을 조회할 수 있습니다.</div>
+    </div>
+    <div class="src">
+      <div class="n">관광지 집중률 방문자 추이 예측</div>
+      <div class="o">한국관광공사</div>
+      <div class="u">이동통신 데이터 기반 혼잡 예측치. 위 혼잡 표시의 <b>◐ 시기 예측</b> 근거입니다.</div>
+    </div>
+    <div class="src">
+      <div class="n">실시간 도시데이터 (인구)</div>
+      <div class="o">서울열린데이터광장</div>
+      <div class="u">주요 지점의 실시간 혼잡도. 위 혼잡 표시의 <b>● 실측</b> 근거입니다.</div>
+    </div>
+  </div>
+  <p class="note">사진 저작권 표시가 공공누리 제3유형(변경금지)인 자료는 원본 그대로만 표시합니다.
+    장소 상세 화면 하단에 각 정보의 출처를 표기합니다.</p>
+
+  <h2>움직이는 화면으로 보기</h2>
+  <video controls preload="metadata" playsinline poster="./shots/course.png">
+    <source src="./demo/demo-2026-09-07.mp4" type="video/mp4" />
+    이 브라우저는 동영상을 재생할 수 없습니다. <a href="./demo/demo-2026-09-07.mp4">영상 파일 열기</a>
+  </video>
+  <p class="note">넘겨서 고르기 → 하루 코스 완성까지 한 번에 담은 실행 녹화입니다.</p>
+
+  <h2>직접 열어보기</h2>
+  <div class="links">
+    <a class="lnk primary" href="./support/">도움말 · 문의</a>
+    <a class="lnk" href="./privacy/">개인정보 처리방침</a>
+    <a class="lnk" href="./demo/demo-2026-09-07.mp4">데모 영상 내려받기</a>
+  </div>
+  <p class="note">친구와 같이 고르기(<code>/duo/</code>)와 코스 공유 뷰어(<code>/s/</code>)는
+    <b>초대 링크에 담긴 코드가 있어야 열립니다.</b> 코드 없이 주소만 여시면 안내 화면이 나옵니다 —
+    오류가 아니라 의도된 동작입니다. 심사용 체험 링크가 필요하시면 아래로 요청해 주세요.</p>
+
+  <div class="foot">
+    SwipeTrip — 2026 관광데이터 활용 공모전 지정과제(오버투어리즘) 출품작.<br />
+    현재 iOS 앱은 App Store 심사 제출을 준비하는 단계이며, 아직 스토어에 공개 배포되지 않았습니다.<br />
+    데이터 출처 · 한국관광공사 TourAPI(국문 관광정보, 관광지 집중률), 서울열린데이터광장(실시간 도시데이터).<br />
+    문의 · <a href="mailto:ttlettle011@gmail.com">ttlettle011@gmail.com</a>
+  </div>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>SwipeTrip — 친구가 보낸 코스</title>
+<meta property="og:title" content="친구가 SwipeTrip 코스를 보냈어요" />
+<meta property="og:description" content="가입 없이 바로 볼 수 있어요 — 스와이프로 만든 하루 코스" />
+<meta property="og:type" content="website" />
+<style>
+  :root {
+    --bg-page: #f7f8fb; --bg-card: #ffffff; --bg-media: #0f1115;
+    --border: rgba(15,17,21,0.08);
+    --text-primary: #0f1115; --text-secondary: #5b6573; --text-tertiary: #9099a6;
+    --blue-primary: #3f7fd8; --blue-deep: #2457a6; --blue-soft: #e8f0fa;
+    --warm1: #fff4d6; --warm3: #ff9b6b; --warm4: #c25a3c;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-font-smoothing: antialiased; }
+  body {
+    font-family: -apple-system, "Apple SD Gothic Neo", "Pretendard", system-ui, sans-serif;
+    background: var(--bg-page); color: var(--text-primary); line-height: 1.45;
+  }
+  .wrap { max-width: 560px; margin: 0 auto; min-height: 100vh; position: relative; }
+  .hero { height: 240px; position: relative; background: linear-gradient(135deg, #ffd9a8, #ff9b6b); }
+  .hero img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .hero .scrim { position: absolute; inset: 0; background: linear-gradient(180deg, transparent 40%, rgba(0,0,0,0.55) 100%); }
+  .hero .t { position: absolute; left: 18px; right: 18px; bottom: 16px; color: #fff; }
+  .hero .eyebrow { font-size: 12px; font-weight: 700; opacity: 0.88; }
+  .hero .name { font-size: 24px; font-weight: 800; letter-spacing: -0.02em; margin-top: 2px; }
+  .meta { padding: 14px 18px 4px; font-size: 14px; color: var(--text-secondary); }
+  .list { padding: 10px 18px 130px; display: flex; flex-direction: column; gap: 12px; }
+  .item { background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; padding: 13px 14px; display: flex; gap: 11px; }
+  .no { width: 22px; height: 22px; border-radius: 50%; background: var(--blue-soft); color: var(--blue-deep); font-size: 11px; font-weight: 800; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px; }
+  .info { flex: 1; min-width: 0; }
+  .nm { font-size: 15px; font-weight: 800; }
+  .ct { font-size: 12px; color: var(--text-tertiary); margin-top: 1px; }
+  .ph { width: 100%; height: 120px; border-radius: 10px; object-fit: cover; margin-top: 8px; display: block; background: var(--blue-soft); }
+  .why { font-size: 12px; color: var(--warm4); background: var(--warm1); border-radius: 8px; padding: 7px 9px; margin-top: 8px; line-height: 1.35; }
+  .vibes { display: flex; gap: 5px; margin-top: 8px; flex-wrap: wrap; }
+  .vchip { font-size: 11px; color: var(--text-secondary); background: var(--bg-page); border: 1px solid var(--border); border-radius: 999px; padding: 2px 9px; }
+  .time { font-size: 12px; color: var(--blue-deep); font-weight: 700; flex-shrink: 0; }
+  .cta {
+    position: fixed; left: 0; right: 0; bottom: 0; padding: 12px 18px calc(18px + env(safe-area-inset-bottom));
+    background: linear-gradient(180deg, rgba(247,248,251,0), rgba(247,248,251,0.97) 35%);
+  }
+  .cta-inner { max-width: 560px; margin: 0 auto; }
+  .cta .main {
+    display: block; background: var(--bg-media); color: #fff; border-radius: 999px; text-align: center;
+    font-size: 15px; font-weight: 800; padding: 15px; border: none; width: 100%; cursor: pointer;
+  }
+  .cta .sub { text-align: center; font-size: 11px; color: var(--text-tertiary); margin-top: 6px; }
+  .state { padding: 110px 24px; text-align: center; }
+  .state .ico { font-size: 40px; }
+  .state .t1 { font-size: 18px; font-weight: 800; margin-top: 12px; }
+  .state .t2 { font-size: 13.5px; color: var(--text-secondary); margin-top: 6px; line-height: 1.5; }
+  .state .homeLink { display: inline-block; margin-top: 18px; font-size: 13.5px; font-weight: 700;
+    text-decoration: none; color: var(--mint); border: 1px solid rgba(0,240,200,0.34);
+    border-radius: 999px; padding: 9px 18px; }
+  .state .homeLink:hover, .state .homeLink:focus-visible { border-color: var(--mint); }
+  .hidden { display: none; }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <div id="loading" class="state"><div class="ico">🧳</div><div class="t1">코스를 펼치는 중…</div></div>
+    <div id="error" class="state hidden">
+      <div class="ico">🥲</div>
+      <div class="t1">코스를 열 수 없어요</div>
+      <div class="t2" id="errorBody">링크가 잘렸거나 오래된 형식이에요.<br/>보낸 친구에게 다시 받아보세요.</div>
+      <a class="homeLink" href="../">SwipeTrip이 뭔가요? →</a>
+    </div>
+    <div id="view" class="hidden">
+      <div class="hero">
+        <img id="heroImg" class="hidden" alt="" />
+        <div class="scrim"></div>
+        <div class="t">
+          <div class="eyebrow">친구가 보낸 코스 초안</div>
+          <div class="name" id="seedName"></div>
+        </div>
+      </div>
+      <div class="meta" id="seedMeta"></div>
+      <div class="list" id="placeList"></div>
+    </div>
+    <div class="cta" id="cta" style="display:none">
+      <div class="cta-inner">
+        <button class="main" id="ctaBtn">나도 내 Trip 만들기</button>
+        <div class="sub">SwipeTrip — 스와이프 5장이면 내 취향 코스가 나와요</div>
+      </div>
+    </div>
+  </div>
+
+<script>
+(function () {
+  'use strict';
+  var $ = function (id) { return document.getElementById(id); };
+
+  function showError(reason) {
+    // 미지원 브라우저 = 오진단 차단 (링크는 멀쩡한데 "잘렸다" 안내 X)
+    if (reason === 'unsupported') {
+      $('errorBody').innerHTML =
+        '이 브라우저에서는 코스를 펼칠 수 없어요.<br/>Safari·Chrome 최신 버전에서 열어보세요.';
+    }
+    $('loading').classList.add('hidden');
+    $('error').classList.remove('hidden');
+  }
+
+  function fromB64Url(s) {
+    var b64 = s.replace(/-/g, '+').replace(/_/g, '/');
+    while (b64.length % 4) b64 += '=';
+    var bin = atob(b64);
+    var out = new Uint8Array(bin.length);
+    for (var i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
+    return out;
+  }
+
+  var MAX_INFLATED = 262144; // 압축 폭탄 sanity cap (256KB) — payload 전형 ~1.5KB
+
+  // raw deflate 해제 — 네이티브 DecompressionStream('deflate-raw') (Safari 16.4+/Chrome 103+)
+  function inflateRaw(bytes) {
+    if (typeof DecompressionStream === 'undefined') {
+      return Promise.reject(new Error('DecompressionStream unsupported'));
+    }
+    var ds = new DecompressionStream('deflate-raw');
+    var stream = new Blob([bytes]).stream().pipeThrough(ds);
+    return new Response(stream).arrayBuffer().then(function (buf) {
+      if (buf.byteLength > MAX_INFLATED) throw new Error('payload too large');
+      return buf;
+    });
+  }
+
+  // 이미지 URL = http(s)만 허용 (javascript:/data: 등 차단). 미허용 = null = 미노출.
+  function safeImg(u) {
+    return typeof u === 'string' && /^https?:\/\//i.test(u) ? u : null;
+  }
+
+  // DOM 생성으로만 렌더 — 문자열 연결 innerHTML 금지 (XSS 차단). 모든 값은 textContent/.src property.
+  function el(tag, cls, txt) {
+    var e = document.createElement(tag);
+    if (cls) e.className = cls;
+    if (txt != null) e.textContent = String(txt);
+    return e;
+  }
+
+  function render(p) {
+    $('seedName').textContent = p.n || '코스 초안';
+    $('seedMeta').textContent = (p.rg || '') + ' · ' + p.p.length + '곳' + (p.sp ? ' · ' + p.sp : '');
+    var hero = p.p[0] && safeImg(p.p[0].i);
+    if (hero) {
+      var himg = $('heroImg');
+      himg.onload = function () { himg.classList.remove('hidden'); };
+      himg.onerror = function () { himg.classList.add('hidden'); };
+      himg.src = hero; // property 대입 = 안전
+    }
+    var list = $('placeList');
+    list.textContent = '';
+    for (var i = 0; i < p.p.length; i++) {
+      var pl = p.p[i];
+      var item = el('div', 'item');
+      item.appendChild(el('span', 'no', i + 1));
+      var info = el('div', 'info');
+      info.appendChild(el('div', 'nm', pl.n));
+      info.appendChild(el('div', 'ct', pl.c));
+      var phUrl = safeImg(pl.i);
+      if (phUrl) {
+        var ph = el('img', 'ph');
+        ph.alt = '';
+        ph.loading = 'lazy';
+        ph.onerror = function () { this.remove(); };
+        ph.src = phUrl; // property 대입 = 속성 탈출 불가
+        info.appendChild(ph);
+      }
+      if (pl.r) info.appendChild(el('div', 'why', '💡 ' + pl.r));
+      if (pl.v && pl.v.length) {
+        var vibes = el('div', 'vibes');
+        for (var j = 0; j < pl.v.length; j++) vibes.appendChild(el('span', 'vchip', '#' + pl.v[j]));
+        info.appendChild(vibes);
+      }
+      item.appendChild(info);
+      item.appendChild(el('span', 'time', pl.t));
+      list.appendChild(item);
+    }
+    $('loading').classList.add('hidden');
+    $('view').classList.remove('hidden');
+    $('cta').style.display = '';
+  }
+
+  $('ctaBtn').addEventListener('click', function () {
+    // 앱 설치 시 deep link — 미설치 fallback = 안내 (App Store URL = 출시 후 교체, PO 영역)
+    var t = Date.now();
+    window.location.href = 'swipetrip://mode-select';
+    setTimeout(function () {
+      if (Date.now() - t < 1600) {
+        alert('SwipeTrip 앱에서 열 수 있어요.\n앱은 출시 준비 중 — 조금만 기다려 주세요!');
+      }
+    }, 1200);
+  });
+
+  var hash = window.location.hash.slice(1);
+  if (!hash) { showError(); return; }
+  // dev-web-sec-3 (2026-09-03) — 해제 전 선검사. 기존 MAX_INFLATED(256KB)는 arrayBuffer()가
+  // 인플레이션 결과 전체를 이미 메모리에 실체화한 뒤에야 검사해 압축폭탄을 막지 못했다
+  // (deflate 최대 ~1000:1 팽창 — 수백 KB 링크로 수백 MB 할당 강제 가능). 정상 payload는
+  // 그 10배 여유를 두고도 할당 자체를 선차단한다. 아래 MAX_INFLATED 사후 검사는 이중 방어로 유지.
+  if (hash.length > 20000) { showError(); return; }
+  if (typeof DecompressionStream === 'undefined') { showError('unsupported'); return; }
+  try {
+    inflateRaw(fromB64Url(hash))
+      .then(function (buf) {
+        var json = new TextDecoder('utf-8').decode(buf);
+        var payload = JSON.parse(json);
+        if (payload.v !== 1 || !Array.isArray(payload.p)) throw new Error('bad payload');
+        render(payload);
+      })
+      .catch(function () { showError(); });
+  } catch (e) {
+    showError();
+  }
+})();
+</script>
+</body>
+</html>
