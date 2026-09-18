@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>SwipeTrip — 도움말·문의</title>
+<style>
+  :root {
+    --bg-page: #070810; --bg-card: #10121a;
+    --border: rgba(255,255,255,0.10);
+    --text-primary: #f4f5f7; --text-secondary: #a7adba;
+    --mint: #00f0c8;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-font-smoothing: antialiased; }
+  body {
+    font-family: -apple-system, "Apple SD Gothic Neo", "Pretendard", system-ui, sans-serif;
+    background: var(--bg-page); color: var(--text-primary); line-height: 1.6;
+  }
+  .wrap { max-width: 640px; margin: 0 auto; padding: 40px 20px 80px; }
+  .kicker { font-size: 12.5px; font-weight: 700; color: var(--mint); letter-spacing: 0.02em; }
+  h1 { font-size: 24px; font-weight: 800; letter-spacing: -0.02em; margin-top: 8px; }
+  .lead { font-size: 14.5px; color: var(--text-secondary); margin-top: 10px; }
+  h2 { font-size: 16px; font-weight: 800; margin-top: 34px; }
+  .card {
+    background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px;
+    padding: 16px 18px; margin-top: 12px;
+  }
+  .q { font-size: 14.5px; font-weight: 700; }
+  .a { font-size: 13.5px; color: var(--text-secondary); margin-top: 6px; }
+  .a + .q { margin-top: 18px; }
+  a { color: var(--mint); }
+  .contact { font-size: 14.5px; }
+  .contact b { display: block; font-size: 13px; color: var(--text-secondary); font-weight: 600; margin-bottom: 4px; }
+  .foot {
+    margin-top: 40px; padding-top: 16px; border-top: 1px solid var(--border);
+    font-size: 12.5px; color: var(--text-secondary);
+  }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="kicker">SwipeTrip</div>
+    <h1>도움말 · 문의</h1>
+    <p class="lead">넘기다 보면 하루가 만들어지는 여행 발견 앱이에요. 궁금한 점이나 잘못된 정보를
+      발견하시면 아래로 알려주세요.</p>
+
+    <h2>자주 묻는 질문</h2>
+    <div class="card">
+      <div class="q">회원가입이나 로그인이 필요한가요?</div>
+      <div class="a">아니요. 계정 없이 바로 쓸 수 있어요. 이름·전화번호·이메일을 받지 않고,
+        기기에서 만든 임의의 식별자만으로 동작해요.</div>
+
+      <div class="q">위치 권한을 거부해도 쓸 수 있나요?</div>
+      <div class="a">네. '내 주변' 찾기에서만 위치를 쓰고, 거부하시면 동네를 직접 골라
+        모든 기능을 그대로 이용할 수 있어요.</div>
+
+      <div class="q">친구와 같이 고르려면 어떻게 하나요?</div>
+      <div class="a">앱에서 '같이' 탭 → 방을 만들면 6자리 코드와 링크가 나와요. 친구는 앱 설치나
+        가입 없이 브라우저에서 링크만 열면 바로 참여할 수 있어요. 링크는 72시간 동안 유효해요.</div>
+
+      <div class="q">'한산한 편'·'붐비는 시기' 표시는 실시간인가요?</div>
+      <div class="a">아니요, 실시간이 아니에요. 한국관광공사 방문자수·관광지 집중률 데이터가
+        기준이고, 표시는 세 종류로 나뉘어요 — 그 장소의 성수기·비수기 예보(관광지 집중률), 같은
+        동네의 공공 신호를 참고한 '동네 기준' 추정, 데이터가 없으면 '정보 없음'으로 둬요.</div>
+
+      <div class="q">장소 정보가 틀렸어요.</div>
+      <div class="a">아래 메일로 장소 이름과 어떤 정보가 다른지 보내주시면 확인 후 고칠게요.
+        영업시간·휴무는 방문 전 매장에 다시 확인하시길 권해요.</div>
+
+      <div class="q">내 기록을 지우고 싶어요.</div>
+      <div class="a">앱을 삭제하면 기기에 저장된 취향·저장 목록은 함께 사라져요. 서버에 남은
+        기록(둘러본 기록·듀오 참여 기록)의 삭제를 원하시면 메일로 요청해 주세요.</div>
+
+      <div class="q">내가 올린 추천은 언제 보이나요?</div>
+      <div class="a">사람이 확인한 뒤 게시돼요(보통 하루 안에). 결과는 앱 '이웃 추천' 화면 위쪽
+        '내 등록'에서 볼 수 있고, 내리고 싶으면 그 행의 '삭제 요청'을 눌러 메일을 보내 주세요.
+        규칙은 <a href="../terms-ugc/">이웃 추천 이용약관</a>에 정리돼 있어요.</div>
+    </div>
+
+    <h2>데이터 출처</h2>
+    <div class="card">
+      <div class="a">장소·소개 정보는 한국관광공사 TourAPI(공공누리)와 서울 열린데이터광장
+        자료를 사용하고, 장소 상세 화면 하단에 출처를 표기해요. 혼잡 관련 표시는 한국관광공사
+        관광지 집중률, 서울시 실시간 도시데이터를 참고해요. '이웃 추천'은 이용자가 직접 올린
+        게시물이며 검수 후 게시돼요.</div>
+    </div>
+
+    <h2>문의</h2>
+    <div class="card contact">
+      <b>이메일</b>
+      <a href="mailto:ttlettle011@gmail.com">ttlettle011@gmail.com</a>
+      <div class="a" style="margin-top:10px">보통 2~3일 안에 답장드려요. 개인정보 관련 문의도
+        같은 주소로 받아요 — <a href="../privacy/">개인정보 처리방침</a></div>
+    </div>
+
+    <p class="foot">SwipeTrip · 개인 개발 앱 · 최종 업데이트 2026-09-14</p>
+  </div>
+</body>
+</html>
